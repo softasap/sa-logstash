@@ -22,6 +22,14 @@
 
     when:  (java_present | failed) and (java_version in ["6", "7", 6, 7])
 
+  - block:
+
+      - set_fact:
+          java_debian_install_method: installer
+
+    when:  (java_present | failed) and (java_debian_install_method is not defined) and not (java_version in ["6", "7", 6, 7])
+
+
   - name: template java discovery script
     template: src="{{role_dir}}/templates/java/get_java.py.j2" dest="/tmp/get_java.py" mode="u=rwx,g=rx,o=rx"
     when:  java_present | failed
