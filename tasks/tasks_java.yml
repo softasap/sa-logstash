@@ -1,5 +1,5 @@
 ---
-# sa-java 1.6.0
+# sa-java 1.7.0
 
   - name: Java | Check if is present
     command: test -x /usr/bin/java
@@ -7,6 +7,15 @@
     register: java_present
     tags:
         -java
+
+  - set_fact:
+      java_alias: "java-{{java_version}}-oracle"
+    when: java_alias is not defined
+
+  - set_fact:
+      java_folder: "/usr/lib/jvm"
+    when: java_folder is not defined
+
 
   - block:
       - debug: msg="Warning, you requested historic java installation not available from oracle download location"
@@ -34,7 +43,6 @@
 
   - name: template java discovery script
     template: src="{{role_dir}}/templates/java/get_java.py.j2" dest="/tmp/get_java.py" mode="u=rwx,g=rx,o=rx"
-    when:  java_present | failed
 
   - debug: msg="installing using {{java_debian_install_method}} on {{ansible_os_family}}"
 
@@ -132,7 +140,7 @@
           url="{{java_download_url.stdout}}"
           validate_certs="true"
           checksum="{{known_hashes[java_download_file]}}"
-        when: option_validate_checksum
+        when: option_validate_checksum | default(False)
         become: "{{ 'no' if role_no_become is defined else 'yes' }}"
         tags:
             -java
@@ -143,7 +151,7 @@
           dest="/tmp/java.tar.gz"
           url="{{java_download_url.stdout}}"
           validate_certs="true"
-        when: not option_validate_checksum
+        when: not option_validate_checksum | default(False)
         become: "{{ 'no' if role_no_become is defined else 'yes' }}"
         tags:
             -java
@@ -191,9 +199,9 @@
         tags:
             -java
 
-      - name: Java | Create symlink for easier update ln -s {{java_folder}}/{{jdk_folder}} {{java_folder}}/{{java_alias}}
-        #file: state=link src="{{java_folder}}/{{jdk_folder}}/" dest="{{java_folder}}/{{java_alias}}"
-        shell: ln -s {{java_folder}}/{{jdk_folder}}/ {{java_folder}}/{{java_alias}}
+      - name: "Java | Create symlink for easier update ln -s {{java_folder}}/{{jdk_folder}} {{java_folder}}/{{java_alias }}"
+        #file: state=link src="{{java_folder}}/{{jdk_folder}}/" dest="{{java_folder}}/{{java_alias }}"
+        shell: ln -s {{java_folder}}/{{jdk_folder}}/ {{java_folder}}/{{java_alias }}
         become: "{{ 'no' if role_no_become is defined else 'yes' }}"
         tags:
             -java
@@ -205,13 +213,13 @@
             -java
 
       - name: Java | Set JAVA_HOME
-        lineinfile: dest=/etc/environment state=present regexp="^JAVA_HOME=*" line="JAVA_HOME={{java_folder}}/{{java_alias}}/"
+        lineinfile: dest=/etc/environment state=present regexp="^JAVA_HOME=*" line="JAVA_HOME={{java_folder}}/{{java_alias }}/"
         become: "{{ 'no' if role_no_become is defined else 'yes' }}"
         tags:
             -java
 
-      - name: Java | add {{java_folder}}/{{java_alias}}/bin to path
-        lineinfile: dest=/etc/environment state=present backrefs=yes regexp='PATH=(["]*)((?!.*?{{java_folder}}/{{java_alias}}/bin).*?)(["]*)$' line="PATH=\1\2:{{java_folder}}/{{java_alias}}/bin\3"
+      - name: Java | add {{java_folder}}/{{java_alias }}/bin to path
+        lineinfile: dest=/etc/environment state=present backrefs=yes regexp='PATH=(["]*)((?!.*?{{java_folder}}/{{java_alias }}/bin).*?)(["]*)$' line="PATH=\1\2:{{java_folder}}/{{java_alias }}/bin\3"
         become: "{{ 'no' if role_no_become is defined else 'yes' }}"
         tags:
             -java
