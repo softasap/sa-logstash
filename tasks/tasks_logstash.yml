@@ -48,7 +48,7 @@
     when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora'
 
   - name: Logstash | restart service
-    service: name="logstash" enabled="yes" state="restarted"
+    service: name="logstash" enabled="yes" state="started"
     when: logstash_present|failed and docker_test is not defined
     tags: logstash
     become: yes
