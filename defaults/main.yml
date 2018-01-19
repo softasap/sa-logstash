@@ -3,4 +3,6 @@
 
 role_dir: "{{role_path}}"
 
-option_install_java: false   
+option_install_java: false
+
+#java_debian_install_method: "source"

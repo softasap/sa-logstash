@@ -43,7 +43,8 @@
   roles:
 
       - {
-         role: "sa-java"       
+         role: "sa-java",
+         java_debian_install_method: "source"
         }
       - {
          role: "sa-logstash"
