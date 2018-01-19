@@ -11,7 +11,7 @@
   - block:
       - debug: msg="Warning, you requested historic java installation not available from oracle download location"
 
-      - debug: msg="Role will use alternative mirror {{alternative_java_6_7_mirror}}"
+      - debug: msg="Role will use alternative mirror {{alternative_java_6_7_mirror | default ('SPECIFY') }}"
 
       - debug: msg="If you are ok with it, set option_accept_non_oracle_mirror = true"
 
@@ -217,4 +217,3 @@
       - java.tar.gz
     tags:
       -java
-
