@@ -30,7 +30,26 @@ vars:
 
 roles:
      - {
-         role: "sa-logstash"
+         role: "sa-logstash",
+         option_install_java: true,
+         java_version: 8,
+         java_debian_install_method: "source",
+
+         logstash_plugins_install:
+             - "logstash-output-jdbc"
+         logstash_plugins_remove:
+             - "logstash-output-kafka"            
+
+         logstash_jdbc_drivers:
+           - {
+             name: "mysql",
+             url: "https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.45.tar.gz"
+             }
+           - {
+             name: "postgres",
+             url: "https://jdbc.postgresql.org/download/postgresql-42.1.4.jre7.jar"
+             }
+
        }
 
 

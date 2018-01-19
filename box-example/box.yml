@@ -5,6 +5,19 @@
   vars:
     - root_dir: "{{playbook_dir}}"
     - env: development
+    - my_logstash_plugins_install:
+        - "logstash-output-jdbc"
+
+    - my_logstash_jdbc_drivers:
+        - {
+          name: "mysql",
+          url: "https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.45.tar.gz"
+          }
+        - {
+          name: "postgres",
+          url: "https://jdbc.postgresql.org/download/postgresql-42.1.4.jre7.jar"
+          }
+
 
 
   pre_tasks:
@@ -48,7 +61,9 @@
 #        }
       - {
          role: "sa-logstash",
-         option_install_java: true
+         option_install_java: true,
+         logstash_plugins_install: "{{my_logstash_plugins_install}}",
+         logstash_jdbc_drivers: "{{my_logstash_jdbc_drivers}}"
         }
 
 
