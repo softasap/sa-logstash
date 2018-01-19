@@ -22,5 +22,6 @@
   roles:
     - {
         role: "role_under_test",
-        docker_test: true
+        docker_test: true,
+        option_install_java: true
       }
