@@ -1,0 +1,4 @@
+- src: softasap.sa-java
+  name: sa-java
+- src: softasap.sa-logstash
+  name: sa-logstash

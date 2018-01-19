@@ -1,0 +1,54 @@
+---
+  - name: Logstash | Check if is present
+    command: test -x /usr/sbin/logstash
+    ignore_errors: yes
+    register: logstash_present
+    tags: logstash
+
+  - block:
+
+    - name: Logstash | Add GPG key to apt keyring
+      apt_key: url=https://artifacts.elastic.co/GPG-KEY-elasticsearch state=present
+      when: logstash_present|failed
+      become: yes
+      tags: logstash
+
+    - name: Logstash | Add Debian apt repository
+      apt_repository: repo="deb https://artifacts.elastic.co/packages/6.x/apt stable main"
+      when: logstash_present|failed
+      tags: logstash
+      become: yes
+
+    - name: Logstash | Install (apt)
+      apt: update-cache=yes force=yes state=present pkg=logstash
+      when: logstash_present|failed
+      tags: logstash
+      become: yes
+    when: ansible_os_family == "Debian"
+
+  - block:
+
+    - name: Logstash | Add  RPM official nginx key
+      rpm_key: key=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS'
+      tags: logstash
+      become: yes
+
+    - name: Logstash | add YUM official nginx repository
+      template: src="{{role_dir}}/templates/logstash/logstash.repo.j2" dest=/etc/yum.repos.d/logstash.repo
+      when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS'
+      tags: logstash
+      become: yes
+
+    - name: Logstash | Install (OS specific yum/dng)
+      package: state=present name=logstash
+      tags: logstash
+      become: yes
+
+    when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora'
+
+  - name: Logstash | restart service
+    service: name="logstash" enabled="yes" state="started"
+    when: logstash_present|failed and docker_test is not defined
+    tags: logstash
+    become: yes
