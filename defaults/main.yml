@@ -6,4 +6,4 @@ role_dir: "{{role_path}}"
 option_install_java: false
 
 java_version: 8
-#java_debian_install_method: "source"
+java_debian_install_method: "source"

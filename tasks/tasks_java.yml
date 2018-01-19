@@ -17,14 +17,16 @@
 
       - debug: msg="As an additional precaution hash will be validated"
 
-      - set_fact:
+      - name: due to java_version in 6-7, set java_debian_install_method to source
+        set_fact:
           java_debian_install_method: source
 
     when:  (java_present | failed) and (java_version in ["6", "7", 6, 7])
 
   - block:
 
-      - set_fact:
+      - name: By default setting java_debian_install_method to installer
+        set_fact:
           java_debian_install_method: installer
 
     when:  (java_present | failed) and (java_debian_install_method is not defined) and not (java_version in ["6", "7", 6, 7])
