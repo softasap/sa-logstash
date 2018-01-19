@@ -1,0 +1,6 @@
+---
+# defaults file for sa-logstash
+
+role_dir: "{{role_path}}"
+
+option_install_java: false   

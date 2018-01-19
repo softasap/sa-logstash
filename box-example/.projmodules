@@ -1,0 +1,6 @@
+[submodule "roles/sa-logstash"]
+        path = roles/sa-logstash
+        url = https://github.com/softasap/sa-logstash.git
+[submodule "roles/sa-java"]
+        path = roles/sa-java
+        url = https://github.com/softasap/sa-java.git
