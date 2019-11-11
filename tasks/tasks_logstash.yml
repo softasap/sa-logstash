@@ -2,26 +2,29 @@
   - name: Logstash | Check if is present
     command: test -x /usr/sbin/logstash
     ignore_errors: yes
+    changed_when: False
     register: logstash_present
-    tags: logstash
+    tags:
+      - logstash
+      - skip_ansible_lint
 
   - block:
 
     - name: Logstash | Add GPG key to apt keyring
       apt_key: url=https://artifacts.elastic.co/GPG-KEY-elasticsearch state=present
-      when: logstash_present|failed
+      when: logstash_present is failed
       become: yes
       tags: logstash
 
     - name: Logstash | Add Debian apt repository
       apt_repository: repo="deb https://artifacts.elastic.co/packages/6.x/apt stable main"
-      when: logstash_present|failed
+      when: logstash_present is failed
       become: yes
       tags: logstash
 
     - name: Logstash | Install (apt)
       apt: update-cache=yes force=yes state=present pkg=logstash
-      when: logstash_present|failed
+      when: logstash_present is failed
       become: yes
       tags: logstash
     when: ansible_os_family == "Debian"
@@ -35,7 +38,7 @@
       tags: logstash
 
     - name: Logstash | add YUM official nginx repository
-      template: src="{{role_dir}}/templates/logstash/logstash.repo.j2" dest=/etc/yum.repos.d/logstash.repo
+      template: src="{{ role_dir }}/templates/logstash/logstash.repo.j2" dest=/etc/yum.repos.d/logstash.repo
       when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS'
       become: yes
       tags: logstash
@@ -48,47 +51,51 @@
     when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora'
 
   - name: Logstash | Remove specified plugins
-    shell: "./logstash-plugin remove {{item}}"
+    shell: "./logstash-plugin remove {{ item }}"
     args:
-      chdir: "{{logstash_base_dir}}/bin"
-    with_items: "{{logstash_plugins_remove|default([])}}"
+      chdir: "{{ logstash_base_dir }}/bin"
+    with_items: "{{ logstash_plugins_remove|default([]) }}"
     become: yes
-    tags: logstash
+    tags:
+      - logstash
+      - skip_ansible_lint
 
   - name: Logstash | Install specified plugins
-    shell: "./logstash-plugin install {{item}}"
+    shell: "./logstash-plugin install {{ item }}"
     args:
-      chdir: "{{logstash_base_dir}}/bin"
-    with_items: "{{logstash_plugins_install|default([])}}"
+      chdir: "{{ logstash_base_dir }}/bin"
+    with_items: "{{ logstash_plugins_install|default([]) }}"
     become: yes
-    tags: logstash
+    tags:
+      - logstash
+      - skip_ansible_lint
 
   - name: Logstash | Precreate folder for jdbc logstash_jdbc_drivers
-    file: path="{{logstash_jdbc_dir}}" state="directory" owner="logstash" group="logstash"
+    file: path="{{ logstash_jdbc_dir }}" state="directory" owner="logstash" group="logstash"
     become: yes
     tags: logstash
 
   - name: Logstash | Install JDBC drivers (download)
     get_url:
-      dest: "/tmp/{{item.name}}.tar.gz"
-      url: "{{item.url}}"
-    with_items: "{{logstash_jdbc_drivers | default([])}}"
+      dest: "/tmp/{{ item.name }}.tar.gz"
+      url: "{{ item.url }}"
+    with_items: "{{ logstash_jdbc_drivers | default([]) }}"
     become: yes
     tags: logstash
 
   - name: Logstash | Install JDBC drivers (unarchieve)
     unarchive:
-      src: "/tmp/{{item.name}}.tar.gz"
-      dest: "{{logstash_jdbc_dir}}"
+      src: "/tmp/{{ item.name }}.tar.gz"
+      dest: "{{ logstash_jdbc_dir }}"
       remote_src: yes
       owner: "logstash"
       group: "logstash"
-    with_items: "{{logstash_jdbc_drivers | default([])}}"
+    with_items: "{{ logstash_jdbc_drivers | default([]) }}"
     become: yes
     tags: logstash
 
   - name: Logstash | restart service
     service: name="logstash" enabled="yes" state="started"
-    when: logstash_present|failed and docker_test is not defined
+    when: logstash_present is failed and docker_test is not defined
     tags: logstash
     become: yes
